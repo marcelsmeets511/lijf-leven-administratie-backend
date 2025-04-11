@@ -1,15 +1,13 @@
 {
-  // ... andere configuratie
   "dependencies": {
     "@emotion/react": "^11.x.x",
     "@emotion/styled": "^11.x.x",
-    "@mui/icons-material": "^5.x.x", // Optioneel voor iconen
+    "@mui/icons-material": "^5.x.x",
     "@mui/material": "^5.x.x",
-    "axios": "^1.x.x", // Of nieuwere versie
+    "axios": "^1.x.x",
     "react": "^18.x.x",
     "react-dom": "^18.x.x",
     "react-router-dom": "^6.x.x",
-    "react-scripts": "5.0.1" // Als je create-react-app gebruikt
-    // ... andere dependencies
+    "react-scripts": "5.0.1"
   }
 }
