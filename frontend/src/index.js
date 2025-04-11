@@ -1,44 +1,33 @@
+// frontend/src/index.js
+
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link as RouterLink } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Container, Box, Button } from '@mui/material';
-import ClientsPage from './pages/ClientsPage';
-import TreatmentMethodsPage from './pages/TreatmentMethodsPage';
-import TreatmentsPage from './pages/TreatmentsPage';
-import InvoicesPage from './pages/InvoicesPage';
+import ReactDOM from 'react-dom/client'; // Nieuwe import voor React 18+
+import './index.css'; // Importeer eventuele globale CSS stijlen
+import App from './App'; // Importeer je hoofd applicatie component
+import reportWebVitals from './reportWebVitals'; // Optioneel: voor performance meting
 
-function App() {
-  return (
-    <Router>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Facturatie App
-            </Typography>
-            <Button color="inherit" component={RouterLink} to="/">Home</Button>
-            <Button color="inherit" component={RouterLink} to="/clients">Cliënten</Button>
-            <Button color="inherit" component={RouterLink} to="/methods">Methodes</Button>
-            <Button color="inherit" component={RouterLink} to="/treatments">Behandelingen</Button>
-            <Button color="inherit" component={RouterLink} to="/invoices">Facturen</Button>
-          </Toolbar>
-        </AppBar>
-      </Box>
-      <Container sx={{ mt: 4 }}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/clients" element={<ClientsPage />} />
-          <Route path="/methods" element={<TreatmentMethodsPage />} />
-          <Route path="/treatments" element={<TreatmentsPage />} />
-          <Route path="/invoices" element={<InvoicesPage />} />
-        </Routes>
-      </Container>
-    </Router>
-  );
-}
+// Importeer CssBaseline van Material UI voor consistente styling basis
+import CssBaseline from '@mui/material/CssBaseline';
 
-// Simpele Home Page component
-const HomePage = () => (
-  <Typography variant="h4">Welkom bij de Facturatie Applicatie</Typography>
+// Zoek het root DOM element waar de app in gemount wordt (uit public/index.html)
+const rootElement = document.getElementById('root');
+
+// Maak een React root aan met de nieuwe API
+const root = ReactDOM.createRoot(rootElement);
+
+// Render de applicatie in de root
+root.render(
+  <React.StrictMode>
+    {/* CssBaseline zorgt voor een goede, consistente basis over verschillende browsers */}
+    <CssBaseline />
+    {/* <App /> is je hoofdcomponent die de rest van de applicatie bevat (incl. routing) */}
+    <App />
+  </React.StrictMode>
 );
 
-export default App;
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+// Dit is optioneel en kan worden verwijderd als je het niet gebruikt.
+reportWebVitals();
+
