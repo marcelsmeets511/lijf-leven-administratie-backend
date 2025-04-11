@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 're
 import {
   AppBar,
   Box,
+  Button, // <<< HIER TOEGEVOEGD
   CssBaseline,
   Drawer,
   IconButton,
