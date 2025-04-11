@@ -3,7 +3,7 @@ services:
   - type: web
     name: facturatie-backend # Jouw servicenaam
     env: python
-    rootDir: ./ # Als je repo beide bevat
+    rootDir: backend # Als je repo beide bevat
     plan: free # Of een betaald plan
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn app:app"
