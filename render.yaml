@@ -1,0 +1,34 @@
+services:
+  # Backend Flask Service
+  - type: web
+    name: facturatie-backend # Jouw servicenaam
+    env: python
+    rootDir: backend # Als je repo beide bevat
+    #plan: free # Of een betaald plan
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: DATABASE_URL
+        value: DATABASE_URL=postgresql://postgres:Witches@3255@db.kvamslpujxynygbcsfak.supabase.co:5432/postgres
+      - key: PYTHON_VERSION
+        value: 3.11 # Kies je Python versie
+      - key: FLASK_SECRET_KEY
+        generateValue: true # Laat Render een secret key genereren
+      - key: FRONTEND_URL # Belangrijk voor CORS
+        value: https://lijf-leven-admin.onrender.com # URL van je frontend service
+
+  # Frontend React Static Site
+  - type: web # Gebruik 'web' voor static sites die build nodig hebben
+    name: facturatie-frontend # Jouw servicenaam
+    env: static # Of 'node' als je meer controle over build nodig hebt
+    rootDir: frontend # Als je repo beide bevat
+    plan: free # Of een betaald plan
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: ./build # Pad naar de build output
+    envVars:
+      - key: REACT_APP_API_URL # Deze wordt gebruikt in api.js
+        value: https://lijf-leven-admin-backend.onrender.com # URL van je backend service
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
