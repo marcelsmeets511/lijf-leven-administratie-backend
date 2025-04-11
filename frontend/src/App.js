@@ -1,11 +1,12 @@
 // frontend/src/App.js
 
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import {
   AppBar,
   Box,
-  Button, // <<< HIER TOEGEVOEGD
+  Button,
+  Container,
   CssBaseline,
   Drawer,
   IconButton,
@@ -16,9 +17,9 @@ import {
   ListItemText,
   Toolbar,
   Typography,
-  ThemeProvider, // Voor theming
-  createTheme, // Om een thema te maken
- // useMediaQuery // Om te checken of we op mobiel zijn
+  ThemeProvider,
+  createTheme,
+  Divider // Toegevoegd voor visuele scheiding
 } from '@mui/material';
 
 // Importeer Icons
@@ -28,6 +29,7 @@ import PeopleIcon from '@mui/icons-material/People'; // Clients
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices'; // Treatment Methods
 import PostAddIcon from '@mui/icons-material/PostAdd'; // Treatments (Registratie)
 import DescriptionIcon from '@mui/icons-material/Description'; // Invoices
+import CloseIcon from '@mui/icons-material/Close'; // Voor sluiten drawer
 
 // Importeer je pagina componenten
 import ClientsPage from './pages/ClientsPage';
@@ -35,8 +37,8 @@ import TreatmentMethodsPage from './pages/TreatmentMethodsPage';
 import TreatmentsPage from './pages/TreatmentsPage';
 import InvoicesPage from './pages/InvoicesPage';
 
-// Definieer de breedte van de drawer
-const drawerWidth = 240;
+// Definieer de breedte van de mobiele drawer
+const drawerWidth = 250;
 
 // Definieer de navigatie-items
 const navItems = [
@@ -47,171 +49,27 @@ const navItems = [
   { text: 'Facturen', icon: <DescriptionIcon />, path: '/invoices' },
 ];
 
-// Maak een basis MUI thema (kan later uitgebreid worden)
+// Maak een basis MUI thema
 const theme = createTheme({
   palette: {
-    // Je kunt hier kleuren aanpassen
-    // primary: { main: '#1976d2' },
-    // secondary: { main: '#dc004e' },
+    primary: {
+      main: '#1976d2', // Standaard MUI blauw
+    },
+    // Je kunt hier meer aanpassingen doen
   },
-  // Je kunt hier typografie aanpassen
+  // Voeg hier eventueel custom breakpoints of andere thema overrides toe
 });
 
-// Simpele Home Page component (als je die nog niet had)
+// Simpele Home Page component
 const HomePage = () => (
     <Box>
         <Typography variant="h4" gutterBottom>Welkom bij de Facturatie Applicatie</Typography>
         <Typography variant="body1">
-            Gebruik het menu aan de linkerkant (of via het icoon op mobiel) om te navigeren tussen de verschillende onderdelen.
+            Selecteer een optie uit het menu hierboven (desktop) of via het menu-icoon (mobiel) om te beginnen.
         </Typography>
+        {/* Hier kun je een dashboard-achtig overzicht toevoegen */}
     </Box>
 );
-
-
-function App() {
-  const [mobileOpen, setMobileOpen] = useState(false); // State voor mobiele drawer
-  const location = useLocation(); // Huidige route informatie
-
-  // Huidige pagina naam vinden voor de AppBar titel
-  const currentPage = navItems.find(item => item.path === location.pathname);
-  const currentPageTitle = currentPage ? currentPage.text : "Facturatie App";
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  // Inhoud van de Drawer (navigatie)
-  const drawerContent = (
-    <div>
-      <Toolbar>
-        {/* Optioneel: Logo of App naam in de Drawer */}
-        <Typography variant="h6" noWrap component="div">
-           Menu
-        </Typography>
-      </Toolbar>
-      {/* <Divider /> */}
-      <List>
-        {navItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              component={NavLink} // Gebruik NavLink voor active state
-              to={item.path}
-              onClick={handleDrawerToggle} // Sluit mobiele drawer na klik
-              // Styling voor actieve link
-              style={({ isActive }) => ({
-                 backgroundColor: isActive ? theme.palette.action.selected : 'transparent',
-                 // color: isActive ? theme.palette.primary.main : 'inherit', // Optioneel: kleur aanpassen
-              })}
-            >
-              <ListItemIcon>
-                {/* Actieve state kleur voor icoon (optioneel) */}
-                {/* React.cloneElement(item.icon, { color: location.pathname === item.path ? 'primary' : 'inherit' }) */}
-                 {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
-
-  return (
-    <ThemeProvider theme={theme}> {/* Wrap met ThemeProvider */}
-      <Router> {/* Router blijft buiten de layout componenten */}
-          <Box sx={{ display: 'flex' }}> {/* Hoofd layout container */}
-            <CssBaseline /> {/* Basis CSS reset */}
-
-            {/* AppBar bovenaan */}
-            <AppBar
-              position="fixed" // Houdt AppBar vast bovenaan
-              sx={{
-                // Zorg dat AppBar boven de permanente drawer uitsteekt op desktop
-                width: { sm: `calc(100% - ${drawerWidth}px)` },
-                ml: { sm: `${drawerWidth}px` },
-              }}
-            >
-              <Toolbar>
-                {/* Menu knop voor mobiel */}
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  edge="start"
-                  onClick={handleDrawerToggle}
-                  sx={{ mr: 2, display: { sm: 'none' } }} // Alleen tonen op mobiel (smaller than sm)
-                >
-                  <MenuIcon />
-                </IconButton>
-                {/* Pagina Titel */}
-                <Typography variant="h6" noWrap component="div">
-                  {currentPageTitle}
-                </Typography>
-              </Toolbar>
-            </AppBar>
-
-            {/* Navigatie Drawer */}
-            <Box
-              component="nav"
-              sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-              aria-label="mailbox folders"
-            >
-              {/* Tijdelijke Drawer voor mobiel */}
-              <Drawer
-                variant="temporary"
-                open={mobileOpen}
-                onClose={handleDrawerToggle}
-                ModalProps={{
-                  keepMounted: true, // Better open performance on mobile.
-                }}
-                sx={{
-                  display: { xs: 'block', sm: 'none' }, // Alleen tonen op mobiel
-                  '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-                }}
-              >
-                {drawerContent}
-              </Drawer>
-
-              {/* Permanente Drawer voor desktop */}
-              <Drawer
-                variant="permanent"
-                sx={{
-                  display: { xs: 'none', sm: 'block' }, // Alleen tonen op desktop
-                  '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-                }}
-                open // Permanent is altijd open
-              >
-                {drawerContent}
-              </Drawer>
-            </Box>
-
-            {/* Hoofd Content Area */}
-            <Box
-              component="main"
-              sx={{
-                 flexGrow: 1, // Neemt resterende ruimte
-                 p: 3, // Padding rondom content
-                 width: { sm: `calc(100% - ${drawerWidth}px)` } // Breedte op desktop
-               }}
-            >
-              {/* Toolbar dient als 'spacer' om content onder de vaste AppBar te duwen */}
-              <Toolbar />
-
-              {/* Hier worden de paginas gerenderd door de Router */}
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/clients" element={<ClientsPage />} />
-                <Route path="/methods" element={<TreatmentMethodsPage />} />
-                <Route path="/treatments" element={<TreatmentsPage />} />
-                <Route path="/invoices" element={<InvoicesPage />} />
-                {/* Voeg hier eventueel een 404 Not Found route toe */}
-                 <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </Box>
-          </Box>
-      </Router>
-    </ThemeProvider>
-  );
-}
 
 // Simpele 404 pagina
 const NotFoundPage = () => (
@@ -227,18 +85,138 @@ const NotFoundPage = () => (
 );
 
 
-// Function component wrapper nodig om useLocation te gebruiken buiten de Router context in App
-// Dit is niet strikt nodig als we de router *binnen* App laten, zoals hierboven.
-// Als je App buiten de Router zou plaatsen, heb je een wrapper nodig:
-/*
-const AppWrapper = () => (
-  <Router>
-    <App />
-  </Router>
-);
-export default AppWrapper;
-*/
+function App() {
+  const [mobileOpen, setMobileOpen] = useState(false); // State voor mobiele drawer
 
-// Omdat Router nu binnen App zit, kunnen we App direct exporteren
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  // Inhoud van de mobiele Drawer
+  const drawer = (
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', p:1}}>
+        <Typography variant="h6" sx={{ my: 2, ml: 1 }}>
+            Menu
+        </Typography>
+        <IconButton>
+            <CloseIcon />
+        </IconButton>
+      </Box>
+      <Divider />
+      <List>
+        {navItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            {/* Gebruik NavLink voor actieve state */}
+            <ListItemButton component={NavLink} to={item.path} sx={{ textAlign: 'left' }}
+               style={({ isActive }) => ({ // Styling voor actieve link
+                 backgroundColor: isActive ? theme.palette.action.hover : 'transparent',
+               })}
+            >
+              <ListItemIcon sx={{minWidth: '40px'}}> {/* Zorg voor consistente ruimte */}
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Router>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}> {/* Hoofd container */}
+          <CssBaseline />
+
+          {/* AppBar bovenaan */}
+          <AppBar component="nav" position="sticky"> {/* Sticky blijft bovenaan bij scrollen */}
+            <Toolbar>
+              {/* Menu knop (alleen mobiel) */}
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2, display: { sm: 'none' } }} // Alleen tonen op mobiel
+              >
+                <MenuIcon />
+              </IconButton>
+
+              {/* App Titel */}
+              <Typography
+                variant="h6"
+                component={NavLink} // Maak titel klikbaar naar home
+                to="/"
+                sx={{ flexGrow: 1, color: 'inherit', textDecoration: 'none' }}
+              >
+                Facturatie App
+              </Typography>
+
+              {/* Navigatie Knoppen (alleen desktop) */}
+              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                {navItems.map((item) => (
+                   // Gebruik NavLink voor actieve state (subtiele styling)
+                  <Button
+                    key={item.text}
+                    component={NavLink}
+                    to={item.path}
+                    sx={{ color: '#fff' }} // Witte tekst
+                    style={({ isActive }) => ({ // Styling voor actieve link
+                        fontWeight: isActive ? 'bold' : 'normal',
+                        textDecoration: isActive ? 'underline' : 'none', // Onderstreping voor actief
+                        textUnderlineOffset: '4px', // Beetje ruimte voor onderstreping
+                    })}
+                  >
+                    {item.text}
+                  </Button>
+                ))}
+              </Box>
+            </Toolbar>
+          </AppBar>
+
+          {/* Mobiele Drawer */}
+          <Box component="nav">
+            <Drawer
+              variant="temporary"
+              open={mobileOpen}
+              onClose={handleDrawerToggle} // Sluit ook bij klikken buiten de drawer
+              ModalProps={{
+                keepMounted: true, // Better open performance on mobile.
+              }}
+              sx={{
+                display: { xs: 'block', sm: 'none' }, // Alleen mobiel
+                '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+              }}
+            >
+              {drawer}
+            </Drawer>
+          </Box>
+
+          {/* Hoofd Content Area */}
+          <Container component="main" sx={{ mt: 4, mb: 4, flexGrow: 1 }}> {/* Container voor centreren en padding */}
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/clients" element={<ClientsPage />} />
+              <Route path="/methods" element={<TreatmentMethodsPage />} />
+              <Route path="/treatments" element={<TreatmentsPage />} />
+              <Route path="/invoices" element={<InvoicesPage />} />
+              <Route path="*" element={<NotFoundPage />} /> {/* Catch-all voor 404 */}
+            </Routes>
+          </Container>
+
+           {/* Optioneel: Footer */}
+           <Box component="footer" sx={{ bgcolor: 'background.paper', p: 2, mt: 'auto' }}>
+               <Typography variant="body2" color="text.secondary" align="center">
+                 © {new Date().getFullYear()} Facturatie App
+               </Typography>
+           </Box>
+
+        </Box>
+      </Router>
+    </ThemeProvider>
+  );
+}
+
 export default App;
-
