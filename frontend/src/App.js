@@ -18,7 +18,7 @@ import {
   Typography,
   ThemeProvider, // Voor theming
   createTheme, // Om een thema te maken
-  useMediaQuery // Om te checken of we op mobiel zijn
+ // useMediaQuery // Om te checken of we op mobiel zijn
 } from '@mui/material';
 
 // Importeer Icons
