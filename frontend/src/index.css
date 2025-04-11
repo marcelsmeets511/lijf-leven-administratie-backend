@@ -11,7 +11,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased; /* Betere font rendering op WebKit (macOS/iOS) */
   -moz-osx-font-smoothing: grayscale; /* Betere font rendering op Firefox (macOS) */
-
+  background-image: url("favicon.png");
+  background-position-y: top;
   /* Optioneel: Je kunt hier een basis achtergrondkleur instellen */
   /* background-color: #f5f5f5;  */
 }
