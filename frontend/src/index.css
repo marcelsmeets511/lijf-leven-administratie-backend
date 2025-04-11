@@ -1,0 +1,66 @@
+/* frontend/src/index.css */
+
+/* Stel de standaard font-family in. 
+   Roboto wordt geladen via index.html (Google Fonts link).
+   De rest zijn fallbacks voor verschillende systemen. 
+   CssBaseline helpt hier ook bij, maar dit definieert de voorkeur. */
+body {
+  margin: 0; /* CssBaseline doet dit al, maar het kan geen kwaad */
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased; /* Betere font rendering op WebKit (macOS/iOS) */
+  -moz-osx-font-smoothing: grayscale; /* Betere font rendering op Firefox (macOS) */
+
+  /* Optioneel: Je kunt hier een basis achtergrondkleur instellen */
+  /* background-color: #f5f5f5;  */
+}
+
+/* Zorgt voor een meer intuïtief box model. CssBaseline past dit ook toe. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Basis styling voor code-elementen (vaak standaard in CRA) */
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* --- Voeg hier eventueel andere globale stijlen toe --- */
+
+/* Bijvoorbeeld: globale link styling (MUI Link component heeft eigen styling) */
+/*
+a {
+  color: #1976d2; // MUI primary color
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+*/
+
+/* Styling voor de scrollbar (werkt in WebKit browsers zoals Chrome/Safari/Edge) */
+/*
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bdbdbd; // Een grijstint van MUI
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+*/
