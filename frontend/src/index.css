@@ -6,7 +6,7 @@
    CssBaseline helpt hier ook bij, maar dit definieert de voorkeur. */
 body {
   margin: 0; /* CssBaseline doet dit al, maar het kan geen kwaad */
-  padding-top 50px;
+  padding-top: 50px;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
