@@ -15,6 +15,7 @@ body {
   background-image: url("favicon.png");
   background-position-y: top;
   background-repeat: no-repeat;
+  background-size: 50%;
   /* Optioneel: Je kunt hier een basis achtergrondkleur instellen */
   /* background-color: #f5f5f5;  */
 }
