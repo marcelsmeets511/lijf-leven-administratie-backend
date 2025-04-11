@@ -1,6 +1,6 @@
 // frontend/src/App.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import {
   AppBar,
@@ -19,7 +19,12 @@ import {
   Typography,
   ThemeProvider,
   createTheme,
-  Divider // Toegevoegd voor visuele scheiding
+  Divider,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CardActions
 } from '@mui/material';
 
 // Importeer Icons
@@ -30,6 +35,8 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices'; // Treatm
 import PostAddIcon from '@mui/icons-material/PostAdd'; // Treatments (Registratie)
 import DescriptionIcon from '@mui/icons-material/Description'; // Invoices
 import CloseIcon from '@mui/icons-material/Close'; // Voor sluiten drawer
+import WarningIcon from '@mui/icons-material/Warning'; // Voor onbetaalde facturen
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Voor "Bekijk alle" knop
 
 // Importeer je pagina componenten
 import ClientsPage from './pages/ClientsPage';
@@ -60,16 +67,116 @@ const theme = createTheme({
   // Voeg hier eventueel custom breakpoints of andere thema overrides toe
 });
 
-// Simpele Home Page component
-const HomePage = () => (
+// Dummy data voor onbetaalde facturen (in een echte app zou je dit uit je API halen)
+const dummyUnpaidInvoices = [
+  { id: 'INV-2023-056', client: 'Janssen, Maria', amount: 1250.00, dueDate: '2023-03-15' },
+  { id: 'INV-2023-078', client: 'Bakker, Thomas', amount: 875.50, dueDate: '2023-03-20' },
+  { id: 'INV-2023-081', client: 'de Vries, Sophie', amount: 650.75, dueDate: '2023-03-22' },
+  { id: 'INV-2023-092', client: 'van Dijk, Peter', amount: 450.25, dueDate: '2023-03-25' },
+  { id: 'INV-2023-103', client: 'Smit, Anna', amount: 325.00, dueDate: '2023-03-28' }
+];
+
+// Aangepaste Home Page component met overzicht onbetaalde facturen
+const HomePage = () => {
+  const [unpaidInvoices, setUnpaidInvoices] = useState([]);
+  const [totalUnpaid, setTotalUnpaid] = useState(0);
+  
+  // In een echte app zou je hier je API aanroepen
+  useEffect(() => {
+    // Sorteer facturen op bedrag (hoogste eerst)
+    const sortedInvoices = [...dummyUnpaidInvoices].sort((a, b) => b.amount - a.amount);
+    setUnpaidInvoices(sortedInvoices);
+    
+    // Bereken totaal openstaand bedrag
+    const total = dummyUnpaidInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+    setTotalUnpaid(total);
+  }, []);
+
+  // Formatteer bedrag als euro
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(amount);
+  };
+
+  return (
     <Box>
-        <Typography variant="h4" gutterBottom>Welkom bij de Facturatie Applicatie</Typography>
-        <Typography variant="body1">
-            Selecteer een optie uit het menu hierboven (desktop) of via het menu-icoon (mobiel) om te beginnen.
-        </Typography>
-        {/* Hier kun je een dashboard-achtig overzicht toevoegen */}
+      <Typography variant="h4" gutterBottom>Welkom bij de Facturatie Applicatie</Typography>
+      <Typography variant="body1" paragraph>
+        Selecteer een optie uit het menu hierboven (desktop) of via het menu-icoon (mobiel) om te beginnen.
+      </Typography>
+      
+      {/* Dashboard met onbetaalde facturen overzicht */}
+      <Box sx={{ mt: 4 }}>
+        <Paper elevation={3} sx={{ p: 3 }}>
+          <Grid container spacing={3}>
+            {/* Overzicht header */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <WarningIcon color="warning" sx={{ mr: 1 }} />
+                  <Typography variant="h5">Onbetaalde Facturen</Typography>
+                </Box>
+                <Button 
+                  variant="text" 
+                  color="primary" 
+                  component={NavLink} 
+                  to="/invoices"
+                  endIcon={<ArrowForwardIcon />}
+                >
+                  Bekijk alle
+                </Button>
+              </Box>
+              <Divider />
+            </Grid>
+            
+            {/* Totaal overzicht */}
+            <Grid item xs={12} md={4}>
+              <Card sx={{ height: '100%', bgcolor: '#f5f5f5' }}>
+                <CardContent>
+                  <Typography variant="subtitle1" color="text.secondary">Totaal openstaand</Typography>
+                  <Typography variant="h4" sx={{ mt: 2, color: 'error.main' }}>
+                    {formatCurrency(totalUnpaid)}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    {unpaidInvoices.length} onbetaalde facturen
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            
+            {/* Top 3 grootste openstaande facturen */}
+            <Grid item xs={12} md={8}>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>Grootste openstaande bedragen</Typography>
+              {unpaidInvoices.slice(0, 3).map((invoice) => (
+                <Card key={invoice.id} sx={{ mb: 2 }}>
+                  <CardContent sx={{ py: 2 }}>
+                    <Grid container alignItems="center">
+                      <Grid item xs={4}>
+                        <Typography variant="subtitle2">{invoice.id}</Typography>
+                        <Typography variant="body2" color="text.secondary">{invoice.client}</Typography>
+                      </Grid>
+                      <Grid item xs={4} sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">Vervaldatum</Typography>
+                        <Typography variant="body1">{invoice.dueDate}</Typography>
+                      </Grid>
+                      <Grid item xs={4} sx={{ textAlign: 'right' }}>
+                        <Typography variant="h6" color="error.main">
+                          {formatCurrency(invoice.amount)}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                  <CardActions sx={{ justifyContent: 'flex-end', pt: 0 }}>
+                    <Button size="small" component={NavLink} to={`/invoices/${invoice.id}`}>Details</Button>
+                  </CardActions>
+                </Card>
+              ))}
+            </Grid>
+          </Grid>
+        </Paper>
+      </Box>
     </Box>
-);
+  );
+};
 
 // Simpele 404 pagina
 const NotFoundPage = () => (
