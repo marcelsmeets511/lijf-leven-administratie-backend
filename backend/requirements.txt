@@ -1,0 +1,8 @@
+Flask>=2.0
+psycopg2-binary>=2.9
+python-dotenv>=0.19
+Flask-Cors>=3.0
+gunicorn # Voor Render deployment
+# Voeg later toe voor export:
+# WeasyPrint>=52 # Check OS dependencies for WeasyPrint!
+# openpyxl>=3.0
