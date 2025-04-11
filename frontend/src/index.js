@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client'; // Nieuwe import voor React 18+
 import './index.css'; // Importeer eventuele globale CSS stijlen
 import App from './App'; // Importeer je hoofd applicatie component
-import reportWebVitals from './reportWebVitals'; // Optioneel: voor performance meting
+//import reportWebVitals from './reportWebVitals'; // Optioneel: voor performance meting
 
 // Importeer CssBaseline van Material UI voor consistente styling basis
 import CssBaseline from '@mui/material/CssBaseline';
