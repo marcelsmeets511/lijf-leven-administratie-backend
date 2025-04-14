@@ -33,8 +33,8 @@ if not DATABASE_URL:
 connection_params = {}
 # Kleinere pool om geheugen te sparen, standaard 'minconn=1, maxconn=10'
 # Aanpassen op basis van werkelijke load
-connection_params['min_size'] = 1
-connection_params['max_size'] = 5
+#connection_params['min_size'] = 1
+#connection_params['max_size'] = 5
 
 def get_db_connection():
     """Maakt verbinding met de PostgreSQL database met psycopg v3."""
