@@ -3,7 +3,7 @@ import sys  # Voor printen naar stderr
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
-import psycopg  # Vervangen door psycopg (v3) voor lager geheugengebruik
+from supabase import create_client
 
 load_dotenv()  # Laadt variabelen van .env bestand
 
@@ -24,47 +24,28 @@ if RENDER_FRONTEND_URL:
 CORS(app, resources={r"/api/*": {"origins": origins}})
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 
 if not DATABASE_URL:
     print("FATAL: DATABASE_URL environment variable not set.", file=sys.stderr)
     sys.exit(1)
 
-# Connection pool configuratie met minimale overhead
-connection_params = {}
-# Kleinere pool om geheugen te sparen, standaard 'minconn=1, maxconn=10'
-# Aanpassen op basis van werkelijke load
-#connection_params['min_size'] = 1
-#connection_params['max_size'] = 5
+if not SUPABASE_KEY:
+    print("FATAL: SUPABASE_KEY environment variable not set.", file=sys.stderr)
+    sys.exit(1)
 
-def get_db_connection():
-    """Maakt verbinding met de PostgreSQL database met psycopg v3."""
-    try:
-        # Gebruikt psycopg's connection pooling met minimale instellingen
-        conn = psycopg.connect(DATABASE_URL, **connection_params, autocommit=False)
-        return conn
-    except psycopg.Error as e:
-        print(f"Database connection error: {e}", file=sys.stderr)
-        return None
+supabase = create_client(DATABASE_URL, SUPABASE_KEY)
 
 # --- Clients API ---
 @app.route('/api/clients', methods=['GET'])
 def get_clients():
-    conn = None
     try:
-        conn = get_db_connection()
-        if not conn: return jsonify({"error": "Database connection failed"}), 500
-        
-        # Gebruik psycopg v3's cursor met row factory
-        with conn.cursor(row_factory=psycopg.rows.dict_row) as cur:
-            cur.execute("SELECT id, name, email, phone FROM clients ORDER BY name")
-            # Gebruik iteratie om geheugengebruik te beperken bij grote datasets
-            clients_list = list(cur)
-            return jsonify(clients_list)
-    except psycopg.Error as e:
+        response = supabase.table('clients').select('id, name, email, phone').order('name').execute()
+        clients_list = response.data
+        return jsonify(clients_list)
+    except Exception as e:
         print(f"Error fetching clients: {e}", file=sys.stderr)
         return jsonify({"error": "Failed to retrieve clients"}), 500
-    finally:
-        if conn: conn.close()
 
 @app.route('/api/clients', methods=['POST'])
 def add_client():
@@ -79,47 +60,42 @@ def add_client():
     if not name:
         return jsonify({"error": "Name is required"}), 400
 
-    conn = None
     try:
-        conn = get_db_connection()
-        if not conn: return jsonify({"error": "Database connection failed"}), 500
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO clients (name, email, phone) VALUES (%s, %s, %s) RETURNING id",
-                (name, email, phone)
-            )
-            new_id = cur.fetchone()[0]
-            conn.commit()
-            return jsonify({"id": new_id, "name": name, "email": email, "phone": phone}), 201
-    except psycopg.Error as e:
-        if conn: conn.rollback()
+        client_data = {
+            "name": name,
+            "email": email,
+            "phone": phone
+        }
+        
+        response = supabase.table('clients').insert(client_data).execute()
+        
+        if response.data and len(response.data) > 0:
+            new_client = response.data[0]
+            return jsonify(new_client), 201
+        else:
+            return jsonify({"error": "Failed to add client"}), 500
+    except Exception as e:
         print(f"Error adding client: {e}", file=sys.stderr)
         if "unique constraint" in str(e).lower():
             return jsonify({"error": "Client with this information might already exist."}), 409
         return jsonify({"error": "Failed to add client"}), 500
-    finally:
-        if conn: conn.close()
 
 # --- Treatment Methods API ---
 @app.route('/api/treatment-methods', methods=['GET'])
 def get_treatment_methods():
-    conn = None
     try:
-        conn = get_db_connection()
-        if not conn: return jsonify({"error": "Database connection failed"}), 500
-        with conn.cursor(row_factory=psycopg.rows.dict_row) as cur:
-            cur.execute("SELECT id, name, billing_type, rate FROM treatment_methods ORDER BY name")
-            methods = list(cur)
-            # Converteer rate naar float in-place om Decimal objecten te vermijden
-            for method in methods:
-                if method['rate'] is not None:
-                    method['rate'] = float(method['rate'])
-            return jsonify(methods)
-    except psycopg.Error as e:
+        response = supabase.table('treatment_methods').select('id, name, billing_type, rate').order('name').execute()
+        methods = response.data
+        
+        # Converteer rate naar float in-place om Decimal objecten te vermijden
+        for method in methods:
+            if method['rate'] is not None:
+                method['rate'] = float(method['rate'])
+        
+        return jsonify(methods)
+    except Exception as e:
         print(f"Error fetching treatment methods: {e}", file=sys.stderr)
         return jsonify({"error": "Failed to retrieve treatment methods"}), 500
-    finally:
-        if conn: conn.close()
 
 @app.route('/api/treatment-methods', methods=['POST'])
 def add_treatment_method():
@@ -144,64 +120,50 @@ def add_treatment_method():
     except (ValueError, TypeError) as verr:
         return jsonify({"error": f"Invalid rate format: {verr}"}), 400
 
-    conn = None
     try:
-        conn = get_db_connection()
-        if not conn: return jsonify({"error": "Database connection failed"}), 500
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO treatment_methods (name, billing_type, rate) VALUES (%s, %s, %s) RETURNING id",
-                (name, billing_type, rate)
-            )
-            new_id = cur.fetchone()[0]
-            conn.commit()
-            return jsonify({"id": new_id, "name": name, "billing_type": billing_type, "rate": float(rate)}), 201
-    except psycopg.Error as e:
-        if conn: conn.rollback()
+        method_data = {
+            "name": name,
+            "billing_type": billing_type,
+            "rate": rate
+        }
+        
+        response = supabase.table('treatment_methods').insert(method_data).execute()
+        
+        if response.data and len(response.data) > 0:
+            new_method = response.data[0]
+            new_method['rate'] = float(new_method['rate']) if new_method['rate'] is not None else None
+            return jsonify(new_method), 201
+        else:
+            return jsonify({"error": "Failed to add treatment method"}), 500
+    except Exception as e:
         print(f"Error adding treatment method: {e}", file=sys.stderr)
         return jsonify({"error": "Failed to add treatment method"}), 500
-    finally:
-        if conn: conn.close()
 
 # --- Treatments API ---
 @app.route('/api/treatments', methods=['GET'])
 def get_treatments():
-    conn = None
     try:
-        conn = get_db_connection()
-        if not conn: return jsonify({"error": "Database connection failed"}), 500
-        with conn.cursor() as cur:
-            # Efficiëntere query met alleen nodige velden
-            cur.execute("""
-                SELECT t.id, t.treatment_date, t.duration_hours, t.notes, t.is_billed,
-                       c.name as client_name, tm.name as method_name, tm.billing_type,
-                       tm.rate
-                FROM treatments t
-                JOIN clients c ON t.client_id = c.id
-                JOIN treatment_methods tm ON t.treatment_method_id = tm.id
-                ORDER BY t.treatment_date DESC, t.created_at DESC
-            """)
-            
-            # Stream verwerking voor lager geheugengebruik
-            treatments_list = []
-            for row in cur:
-                treatments_list.append({
-                    "id": row[0],
-                    "treatment_date": row[1].isoformat() if row[1] else None,
-                    "duration_hours": float(row[2]) if row[2] is not None else None,
-                    "notes": row[3],
-                    "is_billed": row[4],
-                    "client_name": row[5],
-                    "method_name": row[6],
-                    "billing_type": row[7],
-                    "rate": float(row[8]) if row[8] is not None else None
-                })
-            return jsonify(treatments_list)
-    except psycopg.Error as e:
+        # Gebruik een RPC functie om de gecombineerde data te krijgen
+        response = supabase.rpc('get_treatments_with_details').execute()
+        
+        treatments_list = response.data
+        
+        # Converteer data typen indien nodig
+        for treatment in treatments_list:
+            if treatment.get('rate') is not None:
+                treatment['rate'] = float(treatment['rate'])
+            if treatment.get('duration_hours') is not None:
+                treatment['duration_hours'] = float(treatment['duration_hours'])
+        
+        return jsonify(treatments_list)
+        
+        # Alternatieve methode als RPC niet beschikbaar is:
+        # Maak hiervoor een view aan in Supabase en benader deze direct
+        # response = supabase.table('treatments_view').select('*').order('treatment_date.desc').execute()
+        # return jsonify(response.data)
+    except Exception as e:
         print(f"Error fetching treatments: {e}", file=sys.stderr)
         return jsonify({"error": "Failed to retrieve treatments"}), 500
-    finally:
-        if conn: conn.close()
 
 @app.route('/api/treatments', methods=['POST'])
 def add_treatment():
@@ -228,38 +190,33 @@ def add_treatment():
         except (ValueError, TypeError) as verr:
             return jsonify({"error": f"Invalid duration_hours format: {verr}"}), 400
 
-    conn = None
     try:
-        conn = get_db_connection()
-        if not conn: return jsonify({"error": "Database connection failed"}), 500
-        with conn.cursor() as cur:
-            cur.execute(
-                """INSERT INTO treatments (client_id, treatment_method_id, treatment_date, duration_hours, notes)
-                   VALUES (%s, %s, %s, %s, %s) RETURNING id""",
-                (client_id, treatment_method_id, treatment_date, duration_hours, notes)
-            )
-            new_id = cur.fetchone()[0]
-            conn.commit()
-
-            response_data = {
-                "id": new_id,
-                "client_id": client_id,
-                "treatment_method_id": treatment_method_id,
-                "treatment_date": treatment_date,
-                "duration_hours": float(duration_hours) if duration_hours is not None else None,
-                "notes": notes,
-                "is_billed": False
-            }
-            return jsonify(response_data), 201
-
-    except psycopg.Error as e:
-        if conn: conn.rollback()
+        treatment_data = {
+            "client_id": client_id,
+            "treatment_method_id": treatment_method_id,
+            "treatment_date": treatment_date,
+            "duration_hours": duration_hours,
+            "notes": notes,
+            "is_billed": False
+        }
+        
+        response = supabase.table('treatments').insert(treatment_data).execute()
+        
+        if response.data and len(response.data) > 0:
+            new_treatment = response.data[0]
+            
+            # Zorg ervoor dat duration_hours een float is in de response
+            if new_treatment.get('duration_hours') is not None:
+                new_treatment['duration_hours'] = float(new_treatment['duration_hours'])
+                
+            return jsonify(new_treatment), 201
+        else:
+            return jsonify({"error": "Failed to add treatment"}), 500
+    except Exception as e:
         print(f"Error adding treatment: {e}", file=sys.stderr)
         if "foreign key constraint" in str(e).lower():
             return jsonify({"error": "Invalid client_id or treatment_method_id provided."}), 400
         return jsonify({"error": "Failed to add treatment"}), 500
-    finally:
-        if conn: conn.close()
 
 # --- Invoices API (Placeholders) ---
 @app.route('/api/invoices', methods=['GET'])
