@@ -144,7 +144,7 @@ def add_treatment_method():
 def get_treatments():
     try:
         # Gebruik een RPC functie om de gecombineerde data te krijgen
-        response = supabase.rpc('get_treatments_with_details').execute()
+        response = supabase.table('treatments_view').select('*').order('treatment_date.desc').execute()
         
         treatments_list = response.data
         
