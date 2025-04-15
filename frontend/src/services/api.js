@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Gebruik de environment variable die Render injecteert tijdens de build,
 // of val terug op localhost voor development.
-const API_URL = process.env.REACT_APP_API_URL || 'http://lijf-leven-administratie-backend/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://lijf-leven-administratie-backend/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,
