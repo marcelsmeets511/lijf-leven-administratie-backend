@@ -143,7 +143,7 @@ def add_treatment_method():
 @app.route('/api/treatments', methods=['GET'])
 def get_treatments():
     try:
-        response = supabase.table('treatments').select('*').order('treatment_date').execute()
+        response = supabase.table('treatments').select('*').order('treatment_date',desc=True).execute()
         
         treatments_list = response.data
         
@@ -221,7 +221,7 @@ def add_treatment():
 @app.route('/api/invoices', methods=['GET'])
 def get_invoices():
     try:
-        response = supabase.table('invoices').select('*').order('invoice_date').execute()
+        response = supabase.from_('invoices').select('id,client_id,invoice_number,invoice_date,due_date,status,total_amount,created_at,updated_at,clients(id,name)').order('invoice_date').execute()
         
         invoice_list = response.data
       
