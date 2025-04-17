@@ -143,7 +143,6 @@ def add_treatment_method():
 @app.route('/api/treatments', methods=['GET'])
 def get_treatments():
     try:
-        # Gebruik een RPC functie om de gecombineerde data te krijgen
         response = supabase.table('treatments').select('*').order('treatment_date').execute()
         
         treatments_list = response.data
@@ -221,12 +220,15 @@ def add_treatment():
 # --- Invoices API (Placeholders) ---
 @app.route('/api/invoices', methods=['GET'])
 def get_invoices():
-    # Placeholder: Haal facturen op uit de DB (Implementatie nodig)
-    mock_invoices = [
-        {"id": "inv_1", "invoice_number": "FACT-2025-001", "client_name": "Test Client A", "invoice_date": "2025-03-31", "total_amount": 150.00, "status": "open"},
-        {"id": "inv_2", "invoice_number": "FACT-2025-002", "client_name": "Test Client B", "invoice_date": "2025-03-31", "total_amount": 80.00, "status": "paid"},
-    ]
-    return jsonify(mock_invoices)
+    try:
+        response = supabase.table('invoices').select('*').order('invoice_date').execute()
+        
+        invoice_list = response.data
+      
+        return jsonify(invoice_list)
+    except Exception as e:
+        print(f"Error fetching treatments: {e}", file=sys.stderr)
+        return jsonify({"error": "Failed to retrieve treatments"}), 500
 
 @app.route('/api/invoices/generate', methods=['POST'])
 def generate_invoices():
