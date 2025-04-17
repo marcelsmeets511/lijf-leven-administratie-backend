@@ -221,7 +221,7 @@ def add_treatment():
 @app.route('/api/invoices', methods=['GET'])
 def get_invoices():
     try:
-        response = supabase.from_('invoices').select('id,client_id,invoice_number,invoice_date,due_date,status,total_amount,created_at,updated_at,clients(id,name)').order('invoice_date').execute()
+        response = supabase.table('invoices').select('*,clients(*)').order('invoice_date').execute()
         
         invoice_list = response.data
       
