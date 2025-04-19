@@ -146,7 +146,7 @@ function InvoicesPage() {
                   <TableCell component="th" scope="row">
                     {invoice.invoice_number}
                   </TableCell>
-                  <TableCell>{clients.name || 'N/A'}</TableCell> {/* Client naam uit backend halen */}
+                  <TableCell>{invoice.clients.name || 'N/A'}</TableCell> {/* Client naam uit backend halen */}
                   <TableCell>{formatDate(invoice.invoice_date)}</TableCell>
                   <TableCell align="right">{formatCurrency(invoice.total_amount)}</TableCell>
                   <TableCell>{invoice.status}</TableCell>
